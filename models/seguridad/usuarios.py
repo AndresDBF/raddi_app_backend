@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Table, TIMESTAMP
-from sqlalchemy.sql.sqltypes import String, Integer, DateTime, CHAR
+from sqlalchemy.sql.sqltypes import String, Integer, DateTime, CHAR, BigInteger
 from sqlalchemy.sql.functions import func
 from database.conection import engine, meta_data
 
@@ -12,6 +12,7 @@ usuarios = Table("usuarios", meta_data,
               Column("nom_usu", String(80), nullable=False),
               Column("ape_usu", String(80), nullable=False),
               Column("gen_usu", CHAR(1), nullable=False),
+              Column("tel_usu", BigInteger, nullable=False),
               Column("created_at", TIMESTAMP, nullable=False, server_default=func.now()),
               Column("updated_at", TIMESTAMP, nullable=True),
               schema="seguridad"

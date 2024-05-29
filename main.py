@@ -6,11 +6,13 @@ from models.seguridad.usuarios import usuarios
 from models.seguridad.roles import roles
 from models.seguridad.user_roles import user_roles
 from models.seguridad.imagen_usuario import imagen_usuario
+from models.seguridad.datos_identidad import datos_identidad
 from models.general.categoria import categorias
 from models.general.lval import lval
 
 #importacion de middlewares
 from middlewares.usuarios.register import RegUserValidationException, RegUser_validation_exception_handler
+from middlewares.uber.register import RegUberValidationException, RegUber_validation_exception_handler
 
 #importacion de rutas 
 from routes.roles import routerol
@@ -23,11 +25,20 @@ app = FastAPI()
 app.title = "Documentación RaddiApp"
 
 #---------------------------------------rutas estaticas ---------------------------------------------------
-
+#registros del usuario
 app.mount("/static/img/profile", StaticFiles(directory="static/img/profile"), name="profile_images")
+app.mount("/static/img/identify/cedula", StaticFiles(directory="static/img/identify/cedula"), name="identify_images")
+app.mount("/static/img/identify/selfie", StaticFiles(directory="static/img/identify/selfie"), name="selfie_images")
 
+#documentos uber 
+app.mount("/static/img/uber/license", StaticFiles(directory="static/img/uber/license"), name="license")
+app.mount("/static/img/uber/property", StaticFiles(directory="static/img/uber/property"), name="property")
+app.mount("/static/img/uber/rcv", StaticFiles(directory="static/img/uber/rcv"), name="rcv")
+app.mount("/static/img/uber/car_forward", StaticFiles(directory="static/img/uber/car_forward"), name="car_forward")
+app.mount("/static/img/uber/car_side", StaticFiles(directory="static/img/uber/car_side"), name="car_side")
 #----------------------------------------middlewares ----------------------------------------------------------
 app.add_exception_handler(RegUserValidationException,RegUser_validation_exception_handler)
+app.add_exception_handler(RegUberValidationException, RegUber_validation_exception_handler)
 #-----------------------------------------rutas---------------------------------------------------------------
 app.include_router(routerol, tags=["Roles"])
 app.include_router(token, tags=["Login"])
