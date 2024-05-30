@@ -26,39 +26,10 @@ load_dotenv()
 
 security = HTTPBearer()
 
-token = APIRouter(tags=["Login"], responses={status.HTTP_404_NOT_FOUND: {"message": "Direccion No encontrada"}})
+login = APIRouter(tags=["Login"], responses={status.HTTP_404_NOT_FOUND: {"message": "Direccion No encontrada"}})
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
-#funcion que se usara para cubrir las rutas con el token 
-"""async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    email = None
-    try:
-        token = credentials.credentials 
-      
-        if is_token_revoked(token):
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sesion Cerrada")
-        payload = jwt.decode(token, os.getenv("SECRET_KEY"), algorithms=[os.getenv("ALGORITHM")])
-       
-        email: str = payload.get("sub")
-        if email is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales de Autenticacion Invalidas")
-        with engine.connect() as conn:
-            veri_user = conn.execute(select(users.c.id, users.c.banned).select_from(users).where(users.c.email==email).where(users.c.banned==True)).scalar()
-        if veri_user:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token Expirado")
-        return email
-    except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token Expirado") """
-
-#funciones utilizadas para el login
-def is_token_revoked(token: str):
-    with engine.connect() as conn:
-        query =  conn.execute(blacklist_token.select()
-                              .where(blacklist_token.c.token==token)).first()
-        
-        if query is not None:
-            return query
 
 def authenticate_user(email, password):
     user = get_user(email)
@@ -90,20 +61,7 @@ def create_token(data: dict, time_expire: Union[datetime,None] = None):
 
     return token_jwt
 
-#funciones utilizadas para el cierre de sesion 
-
-def add_revoked_token(black_token: str):
-    with engine.connect() as conn:
-        payload = jwt.decode(black_token, os.getenv("SECRET_KEY"), algorithms=[os.getenv("ALGORITHM")])
-        email: str = payload.get("sub")
-        query = text(f"select seguridad.cierre_sesion('{black_token}')")
-        print(query)
-        result = conn.execute(query).scalar()
-        
-        conn.commit()
-    return result
-
-@token.post("/api/user/login/", status_code=status.HTTP_200_OK)
+@login.post("/api/user/login/", status_code=status.HTTP_200_OK)
 async def user_login(email: str = Form(...), password: str = Form(...)):
         try:
             with engine.connect() as conn:
@@ -120,7 +78,7 @@ async def user_login(email: str = Form(...), password: str = Form(...)):
                     user = authenticate_user(email, password)
                     access_token_expires = timedelta(weeks=1)
                        
-                    access_token_jwt = create_token({"sub": user.email}, access_token_expires)
+                    access_token_jwt = create_token({"id":user.id, "email": user.email, "username":user.use_nam}, access_token_expires)
 
                     login_user = {
                         "user":{
@@ -140,17 +98,7 @@ async def user_login(email: str = Form(...), password: str = Form(...)):
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"{e}")
         
-        
-@token.post("/api/logout/")
-async def logout(token: str):
-    try:
-        with engine.connect() as conn:
-            if add_revoked_token(token) == True:
-                return JSONResponse(content={"message": "Se ha Cerrado la Sesion"}, status_code=status.HTTP_200_OK)
-            else:
-                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="No se pudo realizar el cierre de sesión.")
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Ha ocurrido un error: {e}")
+ 
 """ @token.post("/api/user/register_device_token/")
 async def register_device_token(dev_token: str, current_user: str = Depends(get_current_user)):
     with engine.connect() as conn:

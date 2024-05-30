@@ -8,7 +8,7 @@ from datetime import datetime
 
 class RegisterUberForm(BaseModel):
     car_plate: str
-    car_type: EmailStr
+    car_type: str
     year: str 
     color: str
 

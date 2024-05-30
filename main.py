@@ -13,11 +13,12 @@ from models.general.lval import lval
 #importacion de middlewares
 from middlewares.usuarios.register import RegUserValidationException, RegUser_validation_exception_handler
 from middlewares.uber.register import RegUberValidationException, RegUber_validation_exception_handler
+from middlewares.clientes.register import RegCustomerValidationException, RegCustomer_validation_exception_handler
 
 #importacion de rutas 
 from routes.roles import routerol
 from routes.login.register import registeruser
-from routes.login.login import token
+from routes.login.login import login
 #importaciones adicionales
 from fastapi.staticfiles import StaticFiles
 
@@ -36,11 +37,17 @@ app.mount("/static/img/uber/property", StaticFiles(directory="static/img/uber/pr
 app.mount("/static/img/uber/rcv", StaticFiles(directory="static/img/uber/rcv"), name="rcv")
 app.mount("/static/img/uber/car_forward", StaticFiles(directory="static/img/uber/car_forward"), name="car_forward")
 app.mount("/static/img/uber/car_side", StaticFiles(directory="static/img/uber/car_side"), name="car_side")
+
+#documentos cliente
+app.mount("/static/img/cliente/rif", StaticFiles(directory="static/img/cliente/rif"), name="rif_cliente")
+app.mount("/static/img/cliente/portada", StaticFiles(directory="static/img/cliente/portada"), name="portada_cliente")
+
 #----------------------------------------middlewares ----------------------------------------------------------
 app.add_exception_handler(RegUserValidationException,RegUser_validation_exception_handler)
 app.add_exception_handler(RegUberValidationException, RegUber_validation_exception_handler)
+app.add_exception_handler(RegCustomerValidationException, RegCustomer_validation_exception_handler)
 #-----------------------------------------rutas---------------------------------------------------------------
 app.include_router(routerol, tags=["Roles"])
-app.include_router(token, tags=["Login"])
+app.include_router(login, tags=["Login"])
 app.include_router(registeruser, tags=["Login"])
 

@@ -1,5 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Request, status
-from fastapi.responses import FileResponse
+from fastapi import  HTTPException, status
 import io
 from PIL import Image
 

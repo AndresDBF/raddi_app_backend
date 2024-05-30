@@ -12,6 +12,7 @@ class RegisterUserForm(BaseModel):
     name: str 
     last_name: str
     gender: str
+    phone: str
 
     @field_validator('username')
     def check_max_username(cls, v, info):
@@ -44,6 +45,13 @@ class RegisterUserForm(BaseModel):
         max_length = 1
         if len(v) > max_length:
             raise RegUserValidationException(field=info.field_name, details=f"El genero no puede exceder de {max_length} caracteres. Debe ingresar masculino (M) o femenino (F)")
+    
+    @field_validator('phone')
+    def check_max_username(cls, v, info):
+        max_length = 20
+        if len(v) > max_length:
+            raise RegUserValidationException(field=info.field_name, details=f"El número de teléfono excede el maximo de caracteres.")
+        return v
 
 class RegUserValidationException(Exception):
     def __init__(self, field: str, details: str):
