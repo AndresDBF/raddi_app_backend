@@ -86,6 +86,7 @@ async def create_new_user(request: Request, tip_rol: str, username: str, email: 
         
         try:
             new_user = text(f"select seguridad.nuevo_usuario('{tip_rol}','{username}', '{email}', '{hashed_password}', '{name}', '{last_name}', '{str(phone)}', '{gender}')")
+            print(new_user)
             user_id = conn.execute(new_user).scalar()
             conn.commit()
         except Exception as e:

@@ -1,3 +1,4 @@
+import setuptools
 from fastapi import FastAPI
 from database.conection import engine
 #importacion de modelos
@@ -24,7 +25,10 @@ from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 app.title = "Documentación RaddiApp"
-
+@app.get("/")
+async def root():
+    
+    return setuptools.__version__
 #---------------------------------------rutas estaticas ---------------------------------------------------
 #registros del usuario
 app.mount("/static/img/profile", StaticFiles(directory="static/img/profile"), name="profile_images")
