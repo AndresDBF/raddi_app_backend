@@ -12,6 +12,7 @@ perfil_uber = Table("perfil_uber", meta_data,
               Column("ano_veh", String(4), nullable=False),
               Column("air_aco", Boolean, nullable=False),
               Column("col_veh", String(30), nullable=False),
+              Column("con_per", Boolean, nullable=False),
               Column("created_at", TIMESTAMP, nullable=False, server_default=func.now()),
               Column("updated_at", TIMESTAMP, nullable=True),
               schema="uber"

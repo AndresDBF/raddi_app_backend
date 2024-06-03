@@ -38,7 +38,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         if is_token_revoked(token):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sesion Cerrada")
         payload = jwt.decode(token, os.getenv("SECRET_KEY"), algorithms=[os.getenv("ALGORITHM")])
-        print(payload)
+        
         
         email: str = payload.get("email")
         user_id: str = payload.get("id")

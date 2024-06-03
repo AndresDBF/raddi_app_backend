@@ -14,6 +14,7 @@ from models.seguridad.roles import roles
 from models.seguridad.user_roles import user_roles
 from models.seguridad.imagen_usuario import imagen_usuario
 from models.seguridad.datos_identidad import datos_identidad
+from models.automovil.tipo_transporte import tipo_transporte
 from models.automovil.tipo_vehiculo import tipo_vehiculo
 from models.automovil.marca_vehiculo import marca_vehiculo
 from models.automovil.modelo_vehiculo import modelo_vehiculo
@@ -23,7 +24,7 @@ from middlewares.usuarios.register import RegisterUserForm, RegUserValidationExc
 from middlewares.uber.register import RegisterUberForm, RegUberValidationException
 from middlewares.clientes.register import RegisterCustomerForm, RegCustomerValidationException
 
-from routes.compress_image import compress_image
+from config.compress_image import compress_image
 from routes.token.usertoken import get_current_user
 
 from sqlalchemy import insert, select, func, text
@@ -61,7 +62,7 @@ def verify_username_email(username: str, email: str):
             return True 
 
 async def create_new_user(request: Request, tip_rol: str, username: str, email: EmailStr, password: str, name: str, last_name: str,
-                          phone: int, gender: str, image: UploadFile):
+                          code_phone: str, phone: int, gender: str, image: UploadFile):
     
     if not re.match("^[a-zA-Z0-9]+$", username):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="El nombre de usuario no admite espacios y caracteres especiales")
@@ -85,7 +86,7 @@ async def create_new_user(request: Request, tip_rol: str, username: str, email: 
         rol = conn.execute(select(roles.c.id).select_from(roles).where(roles.c.cod_rol==tip_rol)).scalar()
         
         try:
-            new_user = text(f"select seguridad.nuevo_usuario('{tip_rol}','{username}', '{email}', '{hashed_password}', '{name}', '{last_name}', '{str(phone)}', '{gender}')")
+            new_user = text(f"select seguridad.nuevo_usuario('{tip_rol}','{username}', '{email}', '{hashed_password}', '{name}', '{last_name}', '{code_phone}-{str(phone)}', '{gender}')")
             print(new_user)
             user_id = conn.execute(new_user).scalar()
             conn.commit()
@@ -153,11 +154,12 @@ async def user_register(request: Request,
                         password: str = Form(...),
                         name: str = Form(...),
                         last_name: str = Form(...),
+                        code_phone: str = Form(...),
                         phone: int = Form(...),
                         gender: str = Form(...),
                         image: UploadFile = File(...)
 ):
-    await create_new_user(request, "U", username, email, password, name, last_name, phone, gender, image)
+    await create_new_user(request, "U", username, email, password, name, last_name, code_phone, phone, gender, image)
     
     return JSONResponse(content={
                 "saved": True,
@@ -167,11 +169,13 @@ async def user_register(request: Request,
 #registro de uber
 @registeruser.post("/api/uber/register/")       
 async def uber_register(request: Request,
+                        
                         username: str = Form(...),
                         email: EmailStr = Form(...),
                         password: str = Form(...),
                         name: str = Form(...),
                         last_name: str = Form(...),
+                        code_phone: str = Form(...),
                         phone: int = Form(...),
                         gender: str = Form(...),
                         car_plate: str = Form(...),
@@ -189,7 +193,7 @@ async def uber_register(request: Request,
                         car_side: UploadFile = File(...)
 ):
     
-    user_id = await create_new_user(request, "D", username, email, password, name, last_name, phone, gender, image)
+    user_id = await create_new_user(request, "D", username, email, password, name, last_name, code_phone, phone, gender, image)
     
     #validando en el middleware de registro del uber  
     try:
@@ -295,8 +299,9 @@ async def uber_register(request: Request,
             #insertando todos los datos del perfil y documentos 
     with engine.connect() as conn:
         try:
+            
             insert_documents = text(f"select uber.nuevo_perfil_uber({user_id},'{car_plate}','{car_type}','{car_model}',{int(year)},{air},'{color}','{license.filename}','{pr_license}','{property_title.filename}','{pr_property_title}','{rcv.filename}','{pr_rcv}','{car_forward.filename}','{pr_car_forward}','{car_side.filename}','{pr_car_side}')")
-           
+
             conn.execute(insert_documents).scalar()
             conn.commit()
             return JSONResponse(content={
@@ -314,6 +319,7 @@ async def customer_customer(request: Request,
                         password: str = Form(...),
                         name: str = Form(...),
                         last_name: str = Form(...),
+                        code_phone: str = Form(...),
                         phone: int = Form(...),
                         gender: str = Form(...),
                         name_company: str = Form(...),
@@ -326,7 +332,7 @@ async def customer_customer(request: Request,
                         image_place: UploadFile = File(...),
                         
 ):
-    user_id = await create_new_user(request, "C", username, email, password, name, last_name, phone, gender, image)
+    user_id = await create_new_user(request, "C", username, email, password, name, last_name, code_phone, phone, gender, image)
     
     try:
         form_data = RegisterCustomerForm(name_company=name_company, commercial_register=commercial_register, rif=str(rif), direction=direction, phone_company=phone_company)

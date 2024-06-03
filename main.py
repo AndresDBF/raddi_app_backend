@@ -17,9 +17,15 @@ from middlewares.uber.register import RegUberValidationException, RegUber_valida
 from middlewares.clientes.register import RegCustomerValidationException, RegCustomer_validation_exception_handler
 
 #importacion de rutas 
-from routes.roles import routerol
+from config.roles import routerol 
+
 from routes.login.register import registeruser
+from routes.token.usertoken import usertoken
 from routes.login.login import login
+from routes.uber.uber import routesuber
+from routes.user.home import homeuser
+from routes.user.translate import translates
+
 #importaciones adicionales
 from fastapi.staticfiles import StaticFiles
 
@@ -50,8 +56,15 @@ app.mount("/static/img/cliente/portada", StaticFiles(directory="static/img/clien
 app.add_exception_handler(RegUserValidationException,RegUser_validation_exception_handler)
 app.add_exception_handler(RegUberValidationException, RegUber_validation_exception_handler)
 app.add_exception_handler(RegCustomerValidationException, RegCustomer_validation_exception_handler)
+
 #-----------------------------------------rutas---------------------------------------------------------------
 app.include_router(routerol, tags=["Roles"])
+#rutas para login
 app.include_router(login, tags=["Login"])
 app.include_router(registeruser, tags=["Login"])
-
+app.include_router(usertoken, tags=["Home"])
+#rutas para uber
+app.include_router(routesuber, tags=["Uber Routes"])
+#rutas para usuarios 
+app.include_router(homeuser, tags=["User Routes"])
+app.include_router(translates, tags=["User Routes"])
