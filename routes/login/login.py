@@ -33,7 +33,6 @@ pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 def authenticate_user(email, password):
     user = get_user(email)
-
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No se pueden validar las credenciales", headers={"www-authenticate": "Bearer"})
     if not verify_password(password, user.password):
@@ -55,10 +54,8 @@ def create_token(data: dict, time_expire: Union[datetime,None] = None):
         expires = datetime.utcnow() +  timedelta(minutes=1440)#datetime.utcnow() trae la hora de ese instante
     else:
         expires = datetime.utcnow() + time_expire
-    
     data_copy.update({"exp": expires})
     token_jwt = jwt.encode(data_copy, key=os.getenv("SECRET_KEY"), algorithm=os.getenv("ALGORITHM"))
-
     return token_jwt
 
 @login.post("/api/user/login/", status_code=status.HTTP_200_OK)
@@ -68,7 +65,6 @@ async def user_login(email: str = Form(...), password: str = Form(...)):
                 result = conn.execute(usuarios.select().where(usuarios.c.email == email)).first()
                 if result is None:
                     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no registrado")
-
                 id = result.id
                 role = conn.execute(roles.select().
                                     join(user_roles, roles.c.id == user_roles.c.fk_rol_id).

@@ -10,6 +10,10 @@ from models.seguridad.imagen_usuario import imagen_usuario
 from models.seguridad.datos_identidad import datos_identidad
 from models.general.categoria import categorias
 from models.general.lval import lval
+from models.uber.perfil_uber import perfil_uber
+from models.uber.datos_vehiculo import datos_vehiculo
+from models.uber.documentos_vehiculo import documentos_vehiculo
+from models.uber.conexion_uber import conexion_uber
 
 #importacion de middlewares
 from middlewares.usuarios.register import RegUserValidationException, RegUser_validation_exception_handler
